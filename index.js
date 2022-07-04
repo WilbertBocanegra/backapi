@@ -16,7 +16,7 @@ const app = express();
  * @type {number}
  * @const
  */
-const PORT = 3000;
+const PORT = 80;
 
 const whitelist = [
   "https://one-wilbertbocanegra.vercel.app",
