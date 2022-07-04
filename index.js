@@ -79,6 +79,16 @@ app.get("/auth/cookie", (req, res) => {
 
 /**
  * @author Wilbert Bocanegra Velazquez
+ * @description method to get a cookie
+ * @param {express.Request} req
+ * @param {express.Response} res
+ */
+app.get("/", (req, res) => {
+  res.json({ msg: "hello world" });
+});
+
+/**
+ * @author Wilbert Bocanegra Velazquez
  * @description method to destroy a cookie
  * @param {express.Request} req
  * @param {express.Response} res
