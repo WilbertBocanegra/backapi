@@ -5,6 +5,7 @@ import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import jwt from "jsonwebtoken";
 
 /**
  * @type {import('express').Application}
@@ -16,24 +17,26 @@ const app = express();
  * @type {number}
  * @const
  */
-const PORT = 8080;
+const PORT = process.env.PORT;
+
+/**
+ * @type {string}
+ * @const
+ */
+const SECRET_KEY = process.env.SECRET_KEY;
 
 const whitelist = [
-  "https://one-wilbertbocanegra.vercel.app",
-  "https://two-wilbertbocanegra.vercel.app",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3000",
 ];
 
 /**
+ * @description config options for cors
  * @type {import('cors').CorsOptions}
  */
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: whitelist,
   credentials: true,
 };
 
@@ -46,16 +49,27 @@ app.use(express.json());
 
 /**
  * @author Wilbert Bocanegra Velazquez
- * @description method to sign in app
+ * @description - Method to sign in app
  * @param {express.Request} req
  * @param {express.Response} res
  */
 app.post("/auth/login", (req, res) => {
-  res.cookie("auth_enthous_three", "que onda loco", {
-    domain: ".vercel.app",
+  /**
+   * @type {{email:string,password:string}}
+   */
+  const { email, password } = req.body;
+
+  const jwtEncode = jwt.sign({ email, password }, SECRET_KEY);
+
+  res.cookie("auth_enthous_jwt", jwtEncode, {
+    domain: "",
+    secure: true,
+    httpOnly: true,
+  });
+  res.cookie("isAuth", true, {
+    domain: "",
     secure: true,
   });
-
   res.json({
     msg: "Success",
     code: 200,
@@ -71,7 +85,7 @@ app.post("/auth/login", (req, res) => {
  */
 app.get("/auth/cookie", (req, res) => {
   const { cookies } = req;
-
+  console.log(cookies);
   res.json({
     cookies,
   });
@@ -93,8 +107,10 @@ app.get("/", (req, res) => {
  * @param {express.Request} req
  * @param {express.Response} res
  */
-app.put("/auth/remove", (req, res) => {
-  res.clearCookie("auth_enthous_three");
+app.put("/auth/logout", (req, res) => {
+  res.clearCookie("auth_enthous_jwt");
+  res.clearCookie("isAuth");
+
   res.json({
     msg: "logout successfully",
     code: 200,
